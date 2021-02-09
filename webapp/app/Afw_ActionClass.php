@@ -32,6 +32,8 @@ class Afw_ActionClass extends Ethna_ActionClass
 		$this->settings = $backend->getManager('settings');
 		$this->mails = $backend->getManager('mails');		
 		
+		$this->tools = $backend->getManager('tools');		
+		
 		// SmartyActionの追加
         $c = $backend->getController();
         $r = $c->getRenderer();
@@ -41,7 +43,6 @@ class Afw_ActionClass extends Ethna_ActionClass
         $r->setPlugin('table', 'block', array($this, 'AfwSmartyBlockTable'));
         $r->setPlugin('order', 'modifier', array($this, 'AfwSmartyModifierOrder'));
         $r->setPlugin('yymm', 'modifier', array($this, 'AfwSmartyModifierYYMM'));
-        $r->setPlugin('is_manager', 'modifier', array($this, 'isManager'));
         $r->setPlugin('is_sm', 'modifier', array($this, 'isSmartPhone'));
         
         // 初期フォルダの作成
@@ -73,11 +74,6 @@ class Afw_ActionClass extends Ethna_ActionClass
 		}
 		
 		$settings = $this->settings->get();
-		foreach ((array)$this->config->get('config_keys') as $key) {
-			if (!isset($settings[$key])) {
-				$settings[$key] = $this->config->get($key);
-			}
-		}
 		$this->af->setApp('settings', $settings);
 		
 		if (strpos($_SERVER['SERVER_NAME'], 'localhost') !== false || strpos($_SERVER['SERVER_NAME'], '192.168.') !== false) {
@@ -113,20 +109,7 @@ class Afw_ActionClass extends Ethna_ActionClass
 			exit;
 		}
 		
-		// セッションにユーザーIDがあるけれどもauthが仮登録ユーザーの場合は強制的にユーザーフォームへ飛ばす
-		if ($this->session->get('user_id') && $this->session->get('user_auth') == $this->config->get('user_auth_first')) {
-			if (strpos($actionName, 'user_form') === false
-				&& strpos($actionName, 'user_modal') === false
-				&& strpos($actionName, 'ajax_user') === false
-				&& strpos($actionName, 'sign_out') === false
-			) {
-				return $this->backend->perform('user_form');
-			}
-		}
-		
 		if ($this->session->get('user_id')) {
-			// 有料会員
-			$this->af->setApp('is_expire', $this->plants->isExpire());
 		}
 		
 		return parent::authenticate();
@@ -641,34 +624,6 @@ class Afw_ActionClass extends Ethna_ActionClass
 		}
 		$str .= $month . 'ヶ月';
 		return $str;
-	}
-	
-	// 管理者チェック
-	public function isManager()
-	{
-		if (in_array($this->session->get('user_auth'), $this->config->get('user_auth_admins'))) {
-			return true;
-		}
-		return false;
-	}
-	
-	// 管理者ではない場合はリダイレクト
-	public function requiredManager($url = null)
-	{
-		if (in_array($this->session->get('user_auth'), $this->config->get('user_auth_admins'))) {
-			return true;
-		}
-		$this->redirect($url);
-	}
-	
-	// ログイン状態のチェック
-	public function requiredLogin($url = null)
-	{
-		if ($this->session->get('user_id')) {
-			return true;
-		}
-		
-		$this->redirect();
 	}
 	
 	public function isSmartPhone()

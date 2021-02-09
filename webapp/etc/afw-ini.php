@@ -15,7 +15,7 @@ $default = array(
     'base' => '/afw/',			// /ではじまり/で終わる
 	
     // db
-    'dsn' => 'mysql://akky:akky@localhost/nakano',
+    'dsn' => 'mysql://akky:akky@localhost/afw',
 	
 	// mail
 	'mail_from'	=> 'ADMIN',

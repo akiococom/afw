@@ -1,6 +1,6 @@
 <?php
 /**
- *  {$action_path}
+ *  Tool/Db/Templater.php
  *
  *  @author     akio.co.com
  *  @package    Afw
@@ -8,13 +8,13 @@
  */
 
 /**
- *  {$action_name}フォームの実装
+ *  tool_db_templaterフォームの実装
  *
  *  @author     akio.co.com
  *  @access     public
  *  @package    Afw
  */
-class {$action_form} extends Afw_ActionForm
+class Afw_Cli_Form_ToolDbTemplater extends Afw_ActionForm
 {
     /** @var    bool    バリデータにプラグインを使うフラグ */
     var $use_validator_plugin = true;
@@ -45,16 +45,16 @@ class {$action_form} extends Afw_ActionForm
 }
 
 /**
- *  {$action_name}アクションの実装
+ *  tool_db_templaterアクションの実装
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    Afw
  */
-class {$action_class} extends Afw_ActionClass
+class Afw_Cli_Action_ToolDbTemplater extends Afw_ActionClass
 {
     /**
-     *  {$action_name}アクションの前処理
+     *  tool_db_templaterアクションの前処理
      *
      *  @access public
      *  @return string      遷移名(正常終了ならnull, 処理終了ならfalse)
@@ -65,7 +65,7 @@ class {$action_class} extends Afw_ActionClass
     }
 
     /**
-     *  {$action_name}アクションの実装
+     *  tool_db_templaterアクションの実装
      *
      *  @access public
      *  @return string  遷移名

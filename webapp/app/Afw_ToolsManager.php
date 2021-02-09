@@ -1,6 +1,6 @@
 <?php
 /**
- *  {$app_path}
+ *  Afw_ToolsManager.php
  *
  *  @author     akio.co.com
  *  @package    Afw
@@ -8,13 +8,13 @@
  */
 
 /**
- *  {$app_manager}Manager
+ *  Afw_ToolsManager
  *
  *  @author     akio.co.com
  *  @access     public
  *  @package    Afw
  */
-class {$app_manager}Manager extends Afw_AppManager
+class Afw_ToolsManager extends Afw_AppManager
 {
 	var $dbinfo = array(
 		'tables'	=> array(
