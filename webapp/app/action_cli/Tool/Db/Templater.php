@@ -218,9 +218,10 @@ class Afw_Cli_Action_ToolDbTemplater extends Afw_ActionClass
     	$sql = 'SHOW tables';
     	$tables = $this->tools->getAll($sql);
     	$tableNames = array();
+    	$dsns = explode('/', $this->config->get('dsn'));
     	
     	foreach ((array)$tables as $t) {
-    		$tableNames[] = $t['Tables_in_afw'];
+    		$tableNames[] = $t['Tables_in_' . $dsns[count($dsns) - 1]];
     	}
     	
     	return $tableNames;
