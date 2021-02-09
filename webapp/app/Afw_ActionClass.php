@@ -33,6 +33,7 @@ class Afw_ActionClass extends Ethna_ActionClass
 		$this->mails = $backend->getManager('mails');		
 		
 		$this->tools = $backend->getManager('tools');		
+		$this->users = $backend->getManager('users');		
 		
 		// SmartyActionの追加
         $c = $backend->getController();
