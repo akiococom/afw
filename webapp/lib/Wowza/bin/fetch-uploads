@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+#  Bulk Converter - Fetch uploaded files into convert queue directory
+#
+
+if [ ! -f "$CONF" ]; then
+	echo "Usage: CONF=/path/to/bulk-converter.conf $0"
+	exit
+fi
+
+source $CONF
+
+for name in `/bin/ls $UPLOAD_DIR | grep -v '\.err$' | grep -v '\.log$' | grep -v '\.done$'`; do
+	# check if file convertion is not done
+	base=`echo $name | sed 's/\.[^.]*$//'`
+	if [ ! -f "$DONE_DIR/$base.$FORMAT.done" ]; then
+		# check if file is ready (not uploading) by file size delta
+		s0=`wc -c "$UPLOAD_DIR/$name" 2>/dev/null | awk '{print $1}'`
+		sleep 1
+		s1=`wc -c "$UPLOAD_DIR/$name" 2>/dev/null | awk '{print $1}'`
+		if [ "$s0" != "" -a "$s1" != "" -a $s0 -eq $s1 ]; then
+			now=`date '+%Y-%m-%d %H:%M:%S'`
+			if [ ! -f "$QUEUE_DIR/$name" ]; then
+				/bin/cp "$UPLOAD_DIR/$name" "$QUEUE_DIR/$name"
+				echo "[$now] Info: Added a file into queue: $name"
+			#else
+			#	echo "[$now] File is already in queue" >>"$name.err"
+			#	echo "[$now] Error: File is already in queue: $name"
+			fi
+		fi
+	fi
+done
+

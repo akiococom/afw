@@ -1,0 +1,9 @@
+## Bulk Converter
+
+# ties
+0,10,20,30,40,50 * * * * root CONF=/usr/local/bulk-converter/etc/ties.conf /usr/local/bulk-converter/bin/fetch-uploads >>/usr/local/bulk-converter/log/ties.log 2>&1
+5,15,25,35,45,55 * * * * root CONF=/usr/local/bulk-converter/etc/ties.conf /usr/local/bulk-converter/bin/start-convert >>/usr/local/bulk-converter/log/ties.log 2>&1
+
+# vod
+2,12,22,32,42,52 * * * * root CONF=/usr/local/bulk-converter/etc/vod.conf /usr/local/bulk-converter/bin/fetch-uploads >>/usr/local/bulk-converter/log/vod.log 2>&1
+7,17,27,37,47,57 * * * * root CONF=/usr/local/bulk-converter/etc/vod.conf /usr/local/bulk-converter/bin/start-convert >>/usr/local/bulk-converter/log/vod.log 2>&1

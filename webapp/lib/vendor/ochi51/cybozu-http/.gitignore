@@ -1,0 +1,8 @@
+/bin/
+/vendor/
+parameters.yml
+composer.lock
+/tests/_output
+
+# PHPStorm
+.idea

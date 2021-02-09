@@ -1,0 +1,4 @@
+[project]
+ethna_version = 2.3.2
+controller_file = "app/Afw_Controller.php"
+controller_class = "Afw_Controller"

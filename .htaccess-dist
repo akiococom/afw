@@ -1,0 +1,9 @@
+RewriteEngine on
+
+# サイト別にここを変更
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ ./index.php/$1
+Header set Access-Control-Allow-Origin "*"

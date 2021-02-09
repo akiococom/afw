@@ -1,0 +1,7 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "1.14.0",
+        "phpoffice/phpword": "0.17.0",
+        "goat1000/svggraph": "3.6.0",
+    }
+}

@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+#  Bulk Converter - Start convertion for each queued file
+#
+
+if [ ! -f "$CONF" ]; then
+	echo "Usage: CONF=/path/to/bulk-converter.conf $0"
+	exit
+fi
+
+source $CONF
+
+if (ps -ylC ffmpeg >/dev/null 2>&1); then
+	now=`date '+%Y-%m-%d %H:%M:%S'`
+	echo "[$now] Info: Skipped (ffmpeg is running)"
+	exit
+fi
+
+for name in `/bin/ls $QUEUE_DIR | grep -v '\.err$' | grep -v '\.log$' | grep -v '\.done$'`; do
+	# check if file convertion is not done
+	base=`echo $name | sed 's/\.[^.]*$//'`
+	if [ ! -f "$DONE_DIR/$base.$FORMAT.done" ]; then
+		# check if file is ready (not copying) by file size delta
+		s0=`wc -c $QUEUE_DIR/$name 2>/dev/null | awk '{print $1}'`
+		sleep 1
+		s1=`wc -c $QUEUE_DIR/$name 2>/dev/null | awk '{print $1}'`
+		if [ "$s0" != "" -a "$s1" != "" -a $s0 -eq $s1 ]; then
+			now=`date '+%Y-%m-%d %H:%M:%S'`
+			# check if target file does not exists
+			if [ ! -f "$TARGET_DIR/$base.$FORMAT" ]; then
+				echo "[$now] Info: Started convertion: $name -> $base.$FORMAT"
+				(
+					# convert in temporary directory, and move to target if succeeded
+					$FFMPEG -i "$QUEUE_DIR/$name" \
+						$OPTION \
+						-y "$TMP_DIR/$base.$FORMAT" \
+						> "$TMP_DIR/$name.log" 2>&1 \
+					&& test -s "$TMP_DIR/$base.$FORMAT" \
+					&& /bin/mv "$TMP_DIR/$base.$FORMAT" "$TARGET_DIR/$base.$FORMAT"
+				) && (
+					touch "$DONE_DIR/$base.$FORMAT.done"
+					echo "[$now] Info: Finished convertion: $name -> $base.$FORMAT"
+				) || (
+					echo "[$now] Failed to convert to $FORMAT" >>"$UPLOAD_DIR/$name.err"
+					echo "[$now] Error: Failed to convert: $name -> $base.$FORMAT"
+				)
+				# delete queued file regardless whether convertion succeeded or not
+				/bin/rm "$QUEUE_DIR/$name"
+			else
+				# target file exists without *.done file
+				echo "[$now] Target file already exists" >>"$UPLOAD_DIR/$base.err"
+				echo "[$now] Error: Target file already exists: $base.$FORMAT"
+			fi
+		fi
+	fi
+done
+

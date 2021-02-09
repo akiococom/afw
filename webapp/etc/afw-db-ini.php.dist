@@ -1,0 +1,9 @@
+<?php
+/**
+ * データベース関連の設定
+ */
+$db = array(
+    // db
+    // 'dsn' => 'mysql://user:password@server/database',
+);
+?>
