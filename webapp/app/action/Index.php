@@ -44,10 +44,6 @@ class Afw_Action_Index extends Afw_ActionClass
      */
 	function prepare()
 	{
-        // 初期ページが指定されていればそのページを表示
-        if ($this->config->get('index_action')) {
-            return $this->backend->perform($this->config->get('index_action'));
-        }
 		return null;
 	}
 
@@ -59,25 +55,6 @@ class Afw_Action_Index extends Afw_ActionClass
      */
 	function perform()
 	{
-		$this->session->remove('ticket_key');
-		$this->session->remove('stripe_session');
-		
-        // お知らせ
-		$this->appcount('message_count', 'messages', $this->plants->pageMessages(false, 0, 0, null, 0, null, null, $this->isManager(), 3));
-		
-		// 本日開催ライブ
-		$todays = $this->app('today_events', $this->plants->getEventsForToday());
-        $this->app('today_col', floor(12 / count($todays)));
-
-		// 最新オンデマンド
-		$this->app('last_event', $this->plants->getEventForLatestOndemand());
-        
-		// おすすめオンデマンド
-		$this->app('events', $this->plants->getEventsForRecommend(10));
-		$this->app('events2', $this->plants->getEventsForRecommend(10));
-		$this->app('events3', $this->plants->getEventsForRecommend(10));
-		$this->app('events4', $this->plants->getEventsForRecommend(10));
-		
 		return 'index';
 	}
 }
