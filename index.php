@@ -1,7 +1,8 @@
 <?php
 require_once dirname(__FILE__) . '/config.inc.php';
 
-define('SYSTEM_LOG', true);
+define('SYSTEM_LOG', (strpos(@$_SERVER['SERVER_NAME'], 'localhost') !== false));
+//define('SYSTEM_LOG', true);
 
 if (SYSTEM_LOG) {
 	$post = substr(str_replace(array('Array' . PHP_EOL . '(', ')' . PHP_EOL), '', print_r($_POST, 1)), 0, 500);

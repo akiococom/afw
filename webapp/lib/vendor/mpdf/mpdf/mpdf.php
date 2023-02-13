@@ -31361,7 +31361,7 @@ class mPDF
 		$this->current_filename = $filename;
 		$fn = $this->current_filename;
 		if (!isset($this->parsers[$fn])) {
-			// $this->parsers[$fn] = new fpdi_pdf_parser($fn,$this);
+			// $this->parsers[$fn] =& new fpdi_pdf_parser($fn,$this);
 			try {
 				$this->parsers[$fn] = new fpdi_pdf_parser($fn, $this);
 			} catch (Exception $e) {

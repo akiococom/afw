@@ -1745,7 +1745,7 @@ EOT;
                 // make the new object
                 $this->objects[$id] = array('t' => 'image', 'data' => &$options['data'], 'info' => array());
 
-                $info = $this->objects[$id]['info'];
+                $info =& $this->objects[$id]['info'];
 
                 $info['Type'] = '/XObject';
                 $info['Subtype'] = '/Image';

@@ -1,7 +1,5 @@
 <?php
-$db = array();
 $customer = array();
-if (file_exists(dirname(__FILE__) . '/afw-db-ini.php')) require_once dirname(__FILE__) . '/afw-db-ini.php';
 if (file_exists(dirname(__FILE__) . '/afw-customer-ini.php')) require_once dirname(__FILE__) . '/afw-customer-ini.php';
 
 /**
@@ -9,22 +7,21 @@ if (file_exists(dirname(__FILE__) . '/afw-customer-ini.php')) require_once dirna
  * 環境に依存しない設定値はここで設定しバージョン管理の対象とします。
  */
 $default = array(
-    // site
-	'app_name' => 'AFW',
+	// サーバー設定関連
     'url' => 'http://' . @$_SERVER['HTTP_HOST'] . '/afw/',	// /で終わる
     'base' => '/afw/',			// /ではじまり/で終わる
-	
-    // db
-    'dsn' => 'mysql://akky:akky@localhost/afw',
-	
-	// mail
-	'mail_from'	=> 'ADMIN',
-	'mail_debug' => '',
+    'dsn' => 'mysql://glexa:glexa@localhost/dbname',
+
+	// SITE Settings
+	'app_name' => 'AFW',
+	'google_analytics' => '',
+
+	// MAIL settings
+	'mail_from'	=> 'NORPLAY <noreply@plant-fc.com>',
+	'mail_debug' => 'akio@spa.att.ne.jp',
 	'mail_debug_mobile' => '',
+	'mail_bcc' => 'akio@spa.att.ne.jp',
 	
-	// session
- 	// 'session_table' => 'sys_sessions', // nullでファイルに保存
- 	
 	// debug
     'debug' => true,		// デフォルトの影響範囲: メールをmail_debugに送信する
 
@@ -37,5 +34,5 @@ $default = array(
     'log_filter_ignore'     => 'Undefined index.*%%.*tpl',
 );
 
-$config = array_merge($default, $db, $customer);
+$config = array_merge($default, $customer);
 ?>

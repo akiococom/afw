@@ -1,1 +1,9 @@
 /.htaccess
+/files/
+/video/
+/.settings/
+/.project
+/.buildpath
+/.history
+.DS_Store
+webapp/.DS_Stor

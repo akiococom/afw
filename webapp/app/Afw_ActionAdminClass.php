@@ -3,7 +3,7 @@
 /**
  *  Afw_ActionAdminClass.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  */
 
@@ -11,7 +11,7 @@
 /**
  *  action実行クラス
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @access     public
  */

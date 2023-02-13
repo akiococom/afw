@@ -2,7 +2,7 @@
 /**
  *  Afw_Plugin_Filter_ExecutionTime.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @version    $Id: app.plugin.filter.default.php 387 2006-11-06 14:31:24Z cocoitiban $
  */
@@ -10,7 +10,7 @@
 /**
  *  実行時間計測フィルタプラグインの実装
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    Afw
  */

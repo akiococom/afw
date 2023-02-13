@@ -3,7 +3,7 @@
 /**
  *  Afw_ActionForm.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @version    $Id: app.actionform.php 323 2006-08-22 15:52:26Z fujimoto $
  */
@@ -12,7 +12,7 @@
 /**
  *  アクションフォームクラス
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @access     public
  */

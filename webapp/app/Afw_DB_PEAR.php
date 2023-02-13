@@ -108,6 +108,6 @@ class Afw_DB_PEAR extends Ethna_DB_PEAR
     private function onConnectSuccess()
     {
         // MySQL の接続文字コード設定
-        $this->query('SET CHARACTER SET utf8;');
+        $this->query('SET CHARACTER SET utf8mb4;');
     }
 }

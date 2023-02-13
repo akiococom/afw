@@ -1,61 +1,36 @@
-<!-- Header -->
-<header>
-	<!-- Navbar -->
-	<nav class="{{if $is_top}}js-navbar-scroll {{else}}navbar-bg-onscroll {{/if}} navbar fixed-top navbar-expand-lg navbar-dark">
-		<div class="container-fluid">
-			<a class="navbar-brand" href="{{$config.base}}">
-				<h1><img src="{{$config.base}}assets/plant-image/h_fc.png" alt="{{$config.app_name}}" height="32"/></h1>
-			</a>
+<header class=" sticky-top">
+	<nav class="nav-main-header navbar navbar-expand-lg navbar-dark bg-dark">
+		<a class="navbar-brand" href="{{$config.url}}">
+			<img src="{{$config.base}}common/images/logo.png" class="img-logo d-inline-block align-middle"
+				alt="{{$config.app_name}}">
+		</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#nav-menu" aria-controls="nav-menu" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
 
-			<button class="navbar-toggler" type="button"
-							data-toggle="collapse"
-							data-target="#navbarTogglerDemo"
+		<div class="collapse navbar-collapse" id="nav-menu">
+			<ul class="navbar-nav mr-auto mt-2 mt-lg-0 ml-4">
+				<li class="nav-item mx-2">
+					<a class="nav-link" href="{{$config.base}}">{{''|lang}}</a>
+				</li>
+			</ul>
 
-							aria-controls="navbarTogglerDemo"
-							aria-expanded="false"
-							aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-
-			<div class="collapse navbar-collapse" id="navbarTogglerDemo">
-				<ul class="navbar-nav mt-2 mt-lg-0">
-					<li class="nav-item mr-4 mb-2 mb-lg-0">
-						{{*<a class="nav-link active" href="index.html">Back to UI Kit</a>*}}
-					</li>
-				</ul>
-				<ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-					<li class="nav-item mr-4 mb-2 mb-lg-0">
-						<a class="nav-link active" href="{{$config.base}}app/messages/">{{'お知らせ'|lang}}</a>
-					</li>
-					<li class="nav-item mr-4 mb-2 mb-lg-0">
-						<a class="nav-link active" href="{{$config.base}}app/events/">{{'ライブ・イベント'|lang}}</a>
-					</li>
-					<li class="nav-item mr-4 mb-2 mb-lg-0">
-						<a class="nav-link active" href="{{$config.base}}app/pages/">{{'コンテンツ'|lang}}</a>
-					</li>
-					{{if $session.user_id}}
-					{{else}}
-						<li class="nav-item mr-4 mb-2 mb-lg-0">
-							<a class="nav-link active" href="{{$config.base}}app/signup/">{{'はじめての方へ'|lang}}</a>
-						</li>
-					{{/if}}
-				</ul>
-				<div>
-					{{if $session.user_id}}
-						<a class="btn btn-primary" href="{{$config.base}}user/{{$session.user_key}}/">
-							<i class="fas fa-user-alt mr-1"></i>{{if $session.user_nickname}}{{$session.user_nickname}}{{'さん'|lang}}{{/if}}
-							{{'マイページ'|lang}}
-						</a>
-					{{else}}
-						<a class="btn btn-primary" href="{{$config.base}}app/signin/">
-							<i class="fas fa-sign-in-alt mr-1"></i> {{'サインイン'|lang}}
-						</a>
-					{{/if}}
-				</div>
-			</div>
+			{{if $session.user_id && $session.password_md5 != 'guest'}}
+				<a href="{{$config.base}}user/{{$session.user_key}}/">
+					<i class="fas fa-user fa-2x mr-2"></i>
+				</a>
+				<a href="{{$config.base}}user/{{$session.user_key}}/">
+					{{$session.user_nickname}}
+				</a>
+			{{else}}
+				<a href="#" class="a-modal-login">
+					<i class="fas fa-sign-in fa-2x mr-2"></i>
+				</a>
+				<a href="#" class="a-modal-login">
+					{{'ログイン/会員登録(無料)'|lang}}
+				</a>
+			{{/if}}
 		</div>
 	</nav>
-	<!-- End Navbar -->
 </header>
-<!-- End Header -->
-<main>
+<main class="{{if $full}}container-fluid pl-0 pr-0{{else}}container pt-5{{/if}}">

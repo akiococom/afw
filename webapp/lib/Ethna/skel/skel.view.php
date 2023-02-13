@@ -2,15 +2,15 @@
 /**
  *  {$view_path}
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    {$project_id}
- *  @version    1.0
+ *  @version    $Id: skel.view.php 387 2006-11-06 14:31:24Z cocoitiban $
  */
 
 /**
  *  {$forward_name}ビューの実装
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    {$project_id}
  */

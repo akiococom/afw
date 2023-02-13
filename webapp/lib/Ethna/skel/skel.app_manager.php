@@ -2,27 +2,19 @@
 /**
  *  {$app_path}
  *
- *  @author     akio.co.com
- *  @package    Afw
- *  @version    1.0
+ *  @author     {$author}
+ *  @package    {$project_id}
+ *  @version    $Id: skel.app_manager.php 387 2006-11-06 14:31:24Z cocoitiban $
  */
 
 /**
  *  {$app_manager}Manager
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
- *  @package    Afw
+ *  @package    {$project_id}
  */
-class {$app_manager}Manager extends Afw_AppManager
+class {$app_manager}Manager extends Ethna_AppManager
 {
-	var $dbinfo = array(
-		'tables'	=> array(
-			'tablename'		=> 'tables',
-			'keyname'		=> 'table_id',
-			'modifiedname'	=> 'm_datetime',
-			'createdname'	=> 'r_datetime',
-		),
-	);
 }
 ?>

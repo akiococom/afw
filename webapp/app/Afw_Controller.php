@@ -2,7 +2,7 @@
 /**
  *  Afw_Controller.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @version    $Id: app.controller.php 470 2007-07-08 17:48:26Z ichii386 $
  */
@@ -14,7 +14,10 @@ define('EMPTY_DATETIME', '0000-00-00 00:00:00');
 if (strpos(@$_SERVER['REQUEST_URI'], 'common/') !== false) {
 	exit;
 }
-if (strpos(@$_SERVER['REQUEST_URI'], 'pages/') !== false) {
+if (strpos(@$_SERVER['REQUEST_URI'], 'assets/') !== false) {
+	exit;
+}
+if (strpos(@$_SERVER['REQUEST_URI'], 'files/') !== false) {
 	exit;
 }
 
@@ -62,7 +65,7 @@ require_once 'Afw_SmartyPlugin.php';
 /**
  *  Afwアプリケーションのコントローラ定義
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    Afw
  */

@@ -14,7 +14,7 @@ define('ERROR_CODE_LENGTHOVER', 2);
 /**
  *  Afw_AppManager
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    Afw
  */

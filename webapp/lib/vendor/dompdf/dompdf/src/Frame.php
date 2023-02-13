@@ -195,18 +195,18 @@ class Frame
             "h" => null,
         );
 
-        $this->_containing_block[0] = $this->_containing_block["x"];
-        $this->_containing_block[1] = $this->_containing_block["y"];
-        $this->_containing_block[2] = $this->_containing_block["w"];
-        $this->_containing_block[3] = $this->_containing_block["h"];
+        $this->_containing_block[0] =& $this->_containing_block["x"];
+        $this->_containing_block[1] =& $this->_containing_block["y"];
+        $this->_containing_block[2] =& $this->_containing_block["w"];
+        $this->_containing_block[3] =& $this->_containing_block["h"];
 
         $this->_position = array(
             "x" => null,
             "y" => null,
         );
 
-        $this->_position[0] = $this->_position["x"];
-        $this->_position[1] = $this->_position["y"];
+        $this->_position[0] =& $this->_position["x"];
+        $this->_position[1] =& $this->_position["y"];
 
         $this->_opacity = 1.0;
         $this->_decorator = null;

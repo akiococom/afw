@@ -233,7 +233,7 @@ class Style
         if (!isset(self::$_defaults)) {
 
             // Shorthand
-            $d = self::$_defaults;
+            $d =& self::$_defaults;
 
             // All CSS 2.1 properties, and their default values
             $d["azimuth"] = "center";

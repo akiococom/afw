@@ -47,22 +47,32 @@ function smarty_function_afwinput($params, &$smarty)
 		$class = '';
 	}
 	
-	if (isset($params['name'])) {
-		$name = ' name="' . $params['name'] . '"';
+	if (isset($params['action'])) {
+		$name = ' name="action"';
+		$value = ' value="' . $params['action'] . '"';
 	} else {
-		$name = '';
-	}
-	
-	if (isset($params['value'])) {
-		$value = ' value="' . $params['value'] . '"';
-		if (isset($params['checked'])) {
-			// if ($params['value'] == $params['checked']) {
-			if ($params['checked']) {
-				$value .= ' checked="checked"';
-			}
+		if (isset($params['name'])) {
+			$name = ' name="' . $params['name'] . '"';
+		} else {
+			$name = '';
 		}
-	} else {
-		$value = '';
+		
+		if (isset($params['value'])) {
+			$value = ' value="' . $params['value'] . '"';
+			if (isset($params['checked'])) {
+				if ($type == 'radio') {
+					if ($params['value'] == $params['checked']) {
+						$value .= ' checked="checked"';
+					}
+				} else {
+					if ($params['checked']) {
+						$value .= ' checked="checked"';
+					}					
+				}
+			}
+		} else {
+			$value = '';
+		}
 	}
 	
 	if (isset($params['maxlength'])) {
@@ -146,6 +156,12 @@ function smarty_function_afwtextarea($params, &$smarty)
 
 function smarty_function_afwselect($params, &$smarty)
 {
+	if (isset($params['id'])) {
+		$id = ' id="' . $params['id'] . '"';
+	} else {
+		$id = '';
+	}
+	
 	if (isset($params['name'])) {
 		$name = 'name="' . $params['name'] . '"';
 	} else {
@@ -182,7 +198,7 @@ function smarty_function_afwselect($params, &$smarty)
 		}
 	}
 	
-	return sprintf('<select %s class="%s" %s>%s</select>', $name, $class, $option, implode(PHP_EOL, $options));
+	return sprintf('<select %s %s class="%s" %s>%s</select>', $name, $id, $class, $option, implode(PHP_EOL, $options));
 }
 
 function smarty_modifier_tel($tel)
@@ -242,9 +258,13 @@ function smarty_modifier_tel($tel)
 	return implode('-', $devidedTels);
 }
 
-function smarty_modifier_time($datetime)
+function smarty_modifier_time($datetime, $isNotZero = false)
 {
-	return date('G:i', strtotime($datetime));
+	if ($isNotZero) {
+		return date('G:i', strtotime($datetime));
+	} else {
+		return date('H:i', strtotime($datetime));
+	}
 }
 
 /**
@@ -451,20 +471,24 @@ function smarty_modifier_age($date)
  *  @param	bool	$shorYear	TRUE: 2008->08
  *	@return string	00:00
  */
-function smarty_modifier_date($datetime, $year = true, $day = true, $week = false, $isJpn = true, $shortYear = false)
+function smarty_modifier_date($datetime, $week = false,  $year = true, $day = true, $isJpn = true, $shortYear = false)
 {
-	$weeks = array('日', '月', '火', '水', '木', '金', '土');
+	if ($isJpn) {
+		$weeks = array('日', '月', '火', '水', '木', '金', '土');
+	} else {
+		$weeks = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+	}
 	
-	$datetimes = split(' ', $datetime);
-	$dates = split('-', $datetimes[0]);
+	$datetimes = explode(' ', $datetime);
+	$dates = explode('-', $datetimes[0]);
 	if (count($dates) < 2) {
-		$dates = split('/', $datetimes[0]);
+		$dates = explode('/', $datetimes[0]);
 	}
 	if (!count($dates)) {
 		$week = false;
 	}
 	
-	return ($year?(($shortYear)?substr($dates[0], -2, 2):$dates[0]) . ($isJpn?'年':'/'):'') . intval($dates[1]) . ($isJpn?'月':'/') . ($day?(intval($dates[2]) . ($isJpn?'日':'')):'')
+	return ($year?(($shortYear)?substr($dates[0], -2, 2):$dates[0]) . ($isJpn?'年':'.'):'') . intval($dates[1]) . ($isJpn?'月':'.') . ($day?(intval($dates[2]) . ($isJpn?'日':'')):'')
 	       . ($week?'(' . $weeks[date('w', mktime(0,0,0,$dates[1],$dates[2],$dates[0]))] . ')':'');
 }
 

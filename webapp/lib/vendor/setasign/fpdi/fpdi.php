@@ -225,7 +225,7 @@ class FPDI extends FPDF_TPL
         
         $this->tpl++;
         $this->_tpls[$this->tpl] = array();
-        $tpl = $this->_tpls[$this->tpl];
+        $tpl =& $this->_tpls[$this->tpl];
         $tpl['parser'] = $parser;
         $tpl['resources'] = $parser->getPageResources();
         $tpl['buffer'] = $parser->getContent();
@@ -583,7 +583,7 @@ class FPDI extends FPDF_TPL
 
                 // An indirect object reference
                 // Fill the object stack if needed
-                $cpfn = $this->currentParser->filename;
+                $cpfn =& $this->currentParser->filename;
                 if (!isset($this->_doneObjStack[$cpfn][$value[1]])) {
                     $this->_newobj(false, true);
                     $this->_objStack[$cpfn][$value[1]] = array($this->n, $value);

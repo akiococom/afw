@@ -52,7 +52,7 @@ class pdf_context
      */
     public function __construct(&$f)
     {
-        $this->file = $f;
+        $this->file =& $f;
         if (is_string($this->file))
             $this->_mode = 1;
 

@@ -1387,7 +1387,7 @@ Bug fixes
 - background in header overwriting text
 - vertical text in table header not correctly horizontally positioned when repeated
 - compatibility with PHP >= 4.3 (htmlspecialchars_decode, stripos)
-- updated depracated script PHP 5.3.0 ($string{1} to $string[1], $var = new Object(), set_magic_quotes_runtime)
+- updated depracated script PHP 5.3.0 ($string{1} to $string[1], $var =& new Object(), set_magic_quotes_runtime)
 - index (CreateIndex) number string incorrect if arabic(rtl) text anywhere in document
 - MultiCell incorrectly calculate string length/width when using core fonts
 - page-break-inside:avoid - used with non-HTML footer had space inserted for footer height

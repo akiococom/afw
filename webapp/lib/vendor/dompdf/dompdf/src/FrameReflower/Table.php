@@ -63,13 +63,13 @@ class Table extends AbstractFrameReflower
         $absolute_used = $this->_state["absolute_used"];
         $auto_min = $this->_state["auto_min"];
 
-        $absolute = $this->_state["absolute"];
-        $percent = $this->_state["percent"];
-        $auto = $this->_state["auto"];
+        $absolute =& $this->_state["absolute"];
+        $percent =& $this->_state["percent"];
+        $auto =& $this->_state["auto"];
 
         // Determine the actual width of the table
         $cb = $this->_frame->get_containing_block();
-        $columns = $this->_frame->get_cellmap()->get_columns();
+        $columns =& $this->_frame->get_cellmap()->get_columns();
 
         $width = $style->width;
 
@@ -469,10 +469,10 @@ class Table extends AbstractFrameReflower
         }
 
         $cellmap = $frame->get_cellmap();
-        $col = $cellmap->get_column(0);
+        $col =& $cellmap->get_column(0);
         $col["x"] = $content_x;
 
-        $row = $cellmap->get_row(0);
+        $row =& $cellmap->get_row(0);
         $row["y"] = $content_y;
 
         $cellmap->assign_x_positions();
@@ -544,7 +544,7 @@ class Table extends AbstractFrameReflower
         $this->_state["percent"] = array();
         $this->_state["auto"] = array();
 
-        $columns = $this->_frame->get_cellmap()->get_columns();
+        $columns =& $this->_frame->get_cellmap()->get_columns();
         foreach (array_keys($columns) as $i) {
             $this->_state["min_width"] += $columns[$i]["min-width"];
             $this->_state["max_width"] += $columns[$i]["max-width"];

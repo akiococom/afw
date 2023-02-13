@@ -2,15 +2,15 @@
 /**
  *  {$action_path}
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    {$project_id}
- *  @version    1.0
+ *  @version    $Id: skel.action.php 387 2006-11-06 14:31:24Z cocoitiban $
  */
 
 /**
  *  {$action_name}フォームの実装
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    {$project_id}
  */
@@ -47,7 +47,7 @@ class {$action_form} extends {$project_id}_ActionForm
 /**
  *  {$action_name}アクションの実装
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    {$project_id}
  */

@@ -2767,8 +2767,8 @@ class QRcode {
 		$rs['alpha_to'] = array_fill(0, ($rs['nn'] + 1), 0);
 		$rs['index_of'] = array_fill(0, ($rs['nn'] + 1), 0);
 		// PHP style macro replacement ;)
-		$NN = $rs['nn'];
-		$A0 = $NN;
+		$NN =& $rs['nn'];
+		$A0 =& $NN;
 		// Generate Galois field lookup tables
 		$rs['index_of'][0] = $A0; // log(zero) = -inf
 		$rs['alpha_to'][$A0] = 0; // alpha**-inf = 0
@@ -2826,17 +2826,17 @@ class QRcode {
 	 * @return parity array
 	 */
 	 protected function encode_rs_char($rs, $data, $parity) {
-		$MM       = $rs['mm']; // bits per symbol
-		$NN       = $rs['nn']; // the total number of symbols in a RS block
-		$ALPHA_TO = $rs['alpha_to']; // the address of an array of NN elements to convert Galois field elements in index (log) form to polynomial form
-		$INDEX_OF = $rs['index_of']; // the address of an array of NN elements to convert Galois field elements in polynomial form to index (log) form
-		$GENPOLY  = $rs['genpoly']; // an array of NROOTS+1 elements containing the generator polynomial in index form
-		$NROOTS   = $rs['nroots']; // the number of roots in the RS code generator polynomial, which is the same as the number of parity symbols in a block
-		$FCR      = $rs['fcr']; // first consecutive root, index form
-		$PRIM     = $rs['prim']; // primitive element, index form
-		$IPRIM    = $rs['iprim']; // prim-th root of 1, index form
-		$PAD      = $rs['pad']; // the number of pad symbols in a block
-		$A0       = $NN;
+		$MM       =& $rs['mm']; // bits per symbol
+		$NN       =& $rs['nn']; // the total number of symbols in a RS block
+		$ALPHA_TO =& $rs['alpha_to']; // the address of an array of NN elements to convert Galois field elements in index (log) form to polynomial form
+		$INDEX_OF =& $rs['index_of']; // the address of an array of NN elements to convert Galois field elements in polynomial form to index (log) form
+		$GENPOLY  =& $rs['genpoly']; // an array of NROOTS+1 elements containing the generator polynomial in index form
+		$NROOTS   =& $rs['nroots']; // the number of roots in the RS code generator polynomial, which is the same as the number of parity symbols in a block
+		$FCR      =& $rs['fcr']; // first consecutive root, index form
+		$PRIM     =& $rs['prim']; // primitive element, index form
+		$IPRIM    =& $rs['iprim']; // prim-th root of 1, index form
+		$PAD      =& $rs['pad']; // the number of pad symbols in a block
+		$A0       =& $NN;
 		$parity = array_fill(0, $NROOTS, 0);
 		for ($i=0; $i < ($NN - $NROOTS - $PAD); $i++) {
 			$feedback = $INDEX_OF[$data[$i] ^ $parity[0]];

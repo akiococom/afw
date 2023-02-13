@@ -687,7 +687,7 @@ class pdf_parser
                     'gen' => $objSpec[2]
                 );
 
-                $this->_currentObj = $result;
+                $this->_currentObj =& $result;
 
                 // Now simply read the object data until
                 // we encounter an end-of-object marker

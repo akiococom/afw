@@ -2,7 +2,7 @@
 /**
  *  Afw_MailsManager.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @version    $Id: skel.app_manager.php 387 2006-11-06 14:31:24Z cocoitiban $
  */
@@ -10,7 +10,7 @@
 /**
  *  Afw_MailsManager
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    Afw
  */

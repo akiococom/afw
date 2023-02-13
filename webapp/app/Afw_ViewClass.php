@@ -3,7 +3,7 @@
 /**
  *  Afw_ViewClass.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @version    $Id: app.viewclass.php 323 2006-08-22 15:52:26Z fujimoto $
  */
@@ -12,7 +12,7 @@
 /**
  *  viewクラス
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @access     public
  */

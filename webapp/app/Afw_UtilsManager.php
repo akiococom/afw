@@ -2,7 +2,7 @@
 /**
  *  Afw_UtilsManager.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @version    $Id: skel.app_manager.php 387 2006-11-06 14:31:24Z cocoitiban $
  */
@@ -10,7 +10,7 @@
 /**
  *  Afw_UtilsManager
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @access     public
  *  @package    Afw
  */
@@ -44,6 +44,13 @@ class Afw_UtilsManager extends Ethna_AppManager
 				
 			$ogp = [];
 			
+			//sitename
+			if( $xml_object->xpath('//meta[@property="og:site_name"]/@content')[0] ):
+				$ogp["site_name"][] = (string)$xml_object->xpath('//meta[@property="og:site_name"]/@content')[0];
+			elseif( $xml_object->xpath('//site_name')[0] ):
+				$ogp["site_name"][] = (string)$xml_object->xpath('//site_name')[0];
+			endif;
+			
 			//title
 			if( $xml_object->xpath('//meta[@property="og:title"]/@content')[0] ):
 				$ogp["title"][] = (string)$xml_object->xpath('//meta[@property="og:title"]/@content')[0];
@@ -60,11 +67,11 @@ class Afw_UtilsManager extends Ethna_AppManager
 			
 			//thumbnail
 			if( $xml_object->xpath('//meta[@property="og:image"]/@content')[0] ):
-				$ogp["thumbnail"][] = (string)$xml_object->xpath('//meta[@property="og:image"]/@content')[0];
+				$ogp["image"][] = (string)$xml_object->xpath('//meta[@property="og:image"]/@content')[0];
 			elseif( $xml_object->xpath('//meta[@name="thumbnail"]/@content')[0] ):
-				$ogp["thumbnail"][] = (string)$xml_object->xpath('//meta[@name="thumbnail"]/@content')[0];
+				$ogp["image"][] = (string)$xml_object->xpath('//meta[@name="thumbnail"]/@content')[0];
 			else:
-				$ogp["thumbnail"][] = $this->config->get('base') . '/images⁄noimage.jpg';
+				$ogp["image"][] = $this->config->get('base') . '/images⁄noimage.jpg';
 			endif;
 		endif;
 		
@@ -226,8 +233,10 @@ class Afw_UtilsManager extends Ethna_AppManager
 				$image = imagecreatefromgif($filenameSource);
 			} elseif ($ext == 'png') {
 				$image = imagecreatefrompng($filenameSource);
+			} else {
+				return false;
 			}
-
+			
 			// 再サンプル
 			$image_p = imagecreatetruecolor($width, $height);
 			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $widthOrig, $heightOrig);

@@ -99,7 +99,7 @@ class FPDF_TPL extends fpdi_bridge
 
         // Save settings
         $this->tpl++;
-        $tpl = $this->_tpls[$this->tpl];
+        $tpl =& $this->_tpls[$this->tpl];
         $tpl = array(
             'o_x' => $this->x,
             'o_y' => $this->y,
@@ -134,7 +134,7 @@ class FPDF_TPL extends fpdi_bridge
         if ($this->CurrentFont) {
             $fontKey = $this->FontFamily . $this->FontStyle;
             if ($fontKey) {
-                $this->_res['tpl'][$this->tpl]['fonts'][$fontKey] = $this->fonts[$fontKey];
+                $this->_res['tpl'][$this->tpl]['fonts'][$fontKey] =& $this->fonts[$fontKey];
                 $this->_out(sprintf('BT /F%d %.2F Tf ET', $this->CurrentFont['i'], $this->FontSizePt));
             }
         }
@@ -174,7 +174,7 @@ class FPDF_TPL extends fpdi_bridge
 
             $fontKey = $this->FontFamily . $this->FontStyle;
             if ($fontKey)
-                $this->CurrentFont = $this->fonts[$fontKey];
+                $this->CurrentFont =& $this->fonts[$fontKey];
 
             return $this->tpl;
         } else {
@@ -212,7 +212,7 @@ class FPDF_TPL extends fpdi_bridge
         }
 
         if ($this->_inTpl) {
-            $this->_res['tpl'][$this->tpl]['tpls'][$tplIdx] = $this->_tpls[$tplIdx];
+            $this->_res['tpl'][$this->tpl]['tpls'][$tplIdx] =& $this->_tpls[$tplIdx];
         }
 
         $tpl = $this->_tpls[$tplIdx];
@@ -308,9 +308,9 @@ class FPDF_TPL extends fpdi_bridge
         $fontkey = $this->FontFamily . $this->FontStyle;
 
         if ($this->_inTpl) {
-            $this->_res['tpl'][$this->tpl]['fonts'][$fontkey] = $this->fonts[$fontkey];
+            $this->_res['tpl'][$this->tpl]['fonts'][$fontkey] =& $this->fonts[$fontkey];
         } else {
-            $this->_res['page'][$this->page]['fonts'][$fontkey] = $this->fonts[$fontkey];
+            $this->_res['page'][$this->page]['fonts'][$fontkey] =& $this->fonts[$fontkey];
         }
     }
 
@@ -335,9 +335,9 @@ class FPDF_TPL extends fpdi_bridge
 
         $ret = parent::Image($file, $x, $y, $w, $h, $type, $link);
         if ($this->_inTpl) {
-            $this->_res['tpl'][$this->tpl]['images'][$file] = $this->images[$file];
+            $this->_res['tpl'][$this->tpl]['images'][$file] =& $this->images[$file];
         } else {
-            $this->_res['page'][$this->page]['images'][$file] = $this->images[$file];
+            $this->_res['page'][$this->page]['images'][$file] =& $this->images[$file];
         }
 
         return $ret;

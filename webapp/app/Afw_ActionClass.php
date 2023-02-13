@@ -3,7 +3,7 @@
 /**
  *  Afw_ActionClass.php
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  */
 
@@ -12,15 +12,21 @@
 /**
  *  action実行クラス
  *
- *  @author     akio.co.com
+ *  @author     {$author}
  *  @package    Afw
  *  @access     public
  */
 class Afw_ActionClass extends Ethna_ActionClass
 {
+	/** @var Afw_UtilsManager */
 	var $utils;
+	/** @var Afw_SettingsManager */
 	var $settings;
 	var $langs;
+	/** @var Afw_PlantsManager */
+	var $plants;
+	/** @var Afw_SakurasManager */
+	var $sakuras;
 	
 	/**
 	 * コンストラクタ
@@ -30,10 +36,11 @@ class Afw_ActionClass extends Ethna_ActionClass
 		// オブジェクトの生成
 		$this->utils = $backend->getManager('utils');
 		$this->settings = $backend->getManager('settings');
-		$this->mails = $backend->getManager('mails');		
+		$this->mails = $backend->getManager('mails');
 		
-		$this->tools = $backend->getManager('tools');		
-		$this->users = $backend->getManager('users');		
+		$this->plants = $backend->getManager('plants');
+		$this->sakuras = $backend->getManager('sakuras');
+		$this->auths = $backend->getManager('auths');
 		
 		// SmartyActionの追加
         $c = $backend->getController();
@@ -41,10 +48,12 @@ class Afw_ActionClass extends Ethna_ActionClass
         $r->setPlugin('yyy', 'function', array($this, 'AfwSmartyAction')); // yyyは自由に変更してください。
         $r->setPlugin('lang', 'modifier', array($this, 'AfwSmartyModifierLang'));
         $r->setPlugin('pager', 'function', array($this, 'AfwSmartyFunctionPager'));
-        $r->setPlugin('table', 'block', array($this, 'AfwSmartyBlockTable'));
         $r->setPlugin('order', 'modifier', array($this, 'AfwSmartyModifierOrder'));
         $r->setPlugin('yymm', 'modifier', array($this, 'AfwSmartyModifierYYMM'));
+        $r->setPlugin('file', 'function', array($this, 'AfwSmartyFunctionFile'));
+        $r->setPlugin('is_manager', 'modifier', array($this, 'isManager'));
         $r->setPlugin('is_sm', 'modifier', array($this, 'isSmartPhone'));
+        $r->setPlugin('script', 'block', array($this, 'AfwSmartyBlockScript'));
         
         // 初期フォルダの作成
         if (!file_exists(BASE . '/log')) {
@@ -75,6 +84,11 @@ class Afw_ActionClass extends Ethna_ActionClass
 		}
 		
 		$settings = $this->settings->get();
+		foreach ((array)$this->config->get('config_keys') as $key) {
+			if (!isset($settings[$key])) {
+				$settings[$key] = $this->config->get($key);
+			}
+		}
 		$this->af->setApp('settings', $settings);
 		
 		if (strpos($_SERVER['SERVER_NAME'], 'localhost') !== false || strpos($_SERVER['SERVER_NAME'], '192.168.') !== false) {
@@ -95,22 +109,47 @@ class Afw_ActionClass extends Ethna_ActionClass
 		$actionName = $this->backend->getController()->getCurrentActionName();
 		
 		// ユーザー別の認証
-		if (strpos($actionName, 'authenticate') === 0) {
-			$basicAuthors = $this->config->get('manage_authors');
-			if (!empty($_SERVER["PHP_AUTH_USER"]) && !empty($_SERVER["PHP_AUTH_PW"])) {
-				if ($basicAuthors[$_SERVER["PHP_AUTH_USER"]] == $_SERVER["PHP_AUTH_PW"]) {
-					return null;
+		if ((strpos($actionName, 'authenticate') === 0 || ($this->config->get('is_test') && strpos($actionName, 'api') !== 0))
+			&& $actionName != 'stripe_subscription_update_accept'
+		) {
+			$basicAuthors = $this->config->get('basic_authors');
+			if ($_SERVER["PHP_AUTH_USER"] && $_SERVER["PHP_AUTH_PW"]) {
+				if ($basicAuthors[$_SERVER["PHP_AUTH_USER"]] != $_SERVER["PHP_AUTH_PW"]) {
+					header("WWW-Authenticate: Basic realm=\"Enter your account.\"");
+					header("HTTP/1.0 401 Unauthorized");
+					//キャンセル時の表示
+					echo "Authorization Required";
+					exit;
 				}
+			} else {
+				header("WWW-Authenticate: Basic realm=\"Enter your account.\"");
+				header("HTTP/1.0 401 Unauthorized");
+				//キャンセル時の表示
+				echo "Authorization Required";
+				exit;
+			}			
+		}
+		
+		// セッションにユーザーIDがあるけれどもauthが仮登録ユーザーの場合は強制的にユーザーフォームへ飛ばす
+		if ($this->session->get('user_id') && $this->session->get('user_auth') == $this->config->get('user_auth_first')) {
+			if (strpos($actionName, 'user_form') === false
+				&& strpos($actionName, 'user_modal') === false
+				&& strpos($actionName, 'ajax_user') === false
+				&& strpos($actionName, 'sign_out') === false
+				&& strpos($actionName, 'upload_accept') === false
+				&& strpos($actionName, 'css_common_view') === false
+			) {
+				return $this->backend->perform('user_form');
 			}
-			
-			header("WWW-Authenticate: Basic realm=\"Enter your account.\"");
-			header("HTTP/1.0 401 Unauthorized");
-			//キャンセル時の表示
-			echo "Authorization Required";
-			exit;
 		}
 		
 		if ($this->session->get('user_id')) {
+			// 有料会員
+			$this->app('is_expire', $this->plants->isExpire());
+			// ポイント
+			$this->app('user_point', (int)$this->plants->getUserPointByUserId($this->session->get('user_id')));
+			// セッショントークン(パスワード文字列をさらにsalt)
+			$this->app('session_token', $this->utils->getMd5($this->session->get('password_md5') . $this->config->get('md5_salt')));
 		}
 		
 		return parent::authenticate();
@@ -184,6 +223,14 @@ class Afw_ActionClass extends Ethna_ActionClass
     {
     	if (!$this->af->get('p')) {
     		$this->af->set('p', 1);
+    	}
+    }
+    
+    // limitのデフォルト値
+    function setLimit()
+    {
+    	if (!$this->af->get('limit')) {
+    		$this->af->set('limit', $this->config->get('default_limit'));
     	}
     }
     
@@ -274,6 +321,37 @@ class Afw_ActionClass extends Ethna_ActionClass
 		return true;
 	}
 
+	/**
+	 * URLHandlerのパス登録されているURLかチェックする
+	 */
+	function isUrl($string)
+	{
+		$url = $this->backend->getController()->getUrlHandler()->action_map[$_SERVER['URL_HANDLER']];
+		
+		foreach ((array)$url as $k => $v) {
+			if (isset($v['path']) && $v['path'] == $string) {
+				// 単純パスがある場合
+				return true;
+			} elseif (isset($v['path_regexp'])) {
+				if (is_array($v['path_regexp'])) {
+					// 正規表現が複数ある場合
+					foreach ((array)$v['path_regexp'] as $vv) {
+						$path = explode('/', str_replace(array('|^'), '', $vv));
+						if ($path[0] == $string) {
+							return true;
+						}						
+					}
+				} else {
+					// 正規表現が1つの場合
+					$path = explode('/', str_replace(array('|^'), '', $v['path_regexp']));
+					if ($path[0] == $string) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * Smarty Action
@@ -357,6 +435,10 @@ class Afw_ActionClass extends Ethna_ActionClass
 
 	public function respondAjaxError($message = null)
 	{
+		if ($this->af->getApp('is_chain')) {
+			return false;
+		}
+		
 		if ($message) {
 			echo json_encode(array('error' => $message));
 		} else {
@@ -367,6 +449,10 @@ class Afw_ActionClass extends Ethna_ActionClass
 	
 	public function respondAjaxSuccess($response = '')
 	{
+		if ($this->af->getApp('is_chain')) {
+			return true;
+		}
+		
 		echo json_encode(array('success' => true, 'response' => $response));
 		exit;		
 	}
@@ -392,6 +478,7 @@ class Afw_ActionClass extends Ethna_ActionClass
 		$isCounter = isset($param['counter']) ? $param['counter'] : true;
 		$scriptAnchor = str_replace('PAGE', '$(this).attr("page")', $param['script']);
 		$scriptSelect = str_replace('PAGE', '$(this).val()', $param['script']);
+		$url = str_replace('PAGE', '%d', $param['url']);
 		if (!$limit) {
 			return false;
 		}
@@ -403,19 +490,23 @@ class Afw_ActionClass extends Ethna_ActionClass
 		if ($endNumber) {
 			$counter = $isCounter ? smarty_modifier_lang(sprintf('%d件中 %d 〜 %d件', $count, $beginNumber, $endNumber)) : '';
 			$prefix = '<nav><ul class="pagination justify-content-end">';
-			$firstlink = '<li class="page-item"><a href="#" aria-label="Previous" class="a-exec-pager page-link" page="1"><span aria-hidden="true">&laquo;&laquo;</span></a></li>';
-			$prevlink = '<li class="page-item"><a href="#" aria-label="Previous" class="a-exec-pager page-link" page="%d"><span aria-hidden="true">&laquo;</span></a></li>';
-			$pager = '<li class="page-item%s"><a href="#" class="a-exec-pager page-link" page="%d">%d</a></li>';
+			$firstlink = '<li class="page-item"><a href="%s" aria-label="Previous" class="a-exec-pager page-link" page="1"><span aria-hidden="true">&laquo;&laquo;</span></a></li>';
+			$prevlink = '<li class="page-item"><a href="%s" aria-label="Previous" class="a-exec-pager page-link" page="%d"><span aria-hidden="true">&laquo;</span></a></li>';
+			$pager = '<li class="page-item%s"><a href="%s" class="a-exec-pager page-link" page="%d">%d</a></li>';
 			$option = '<option value="%d"%s>%d</option>';
-			$nextlink = '<li class="page-item"><a href="#" aria-label="Next" class="a-exec-pager page-link" page="%d"><span aria-hidden="true">&raquo;</span></a></li>';
-			$endlink = '<li class="page-item"><a href="#" aria-label="Next" class="a-exec-pager page-link" page="%d"><span aria-hidden="true">&raquo;&raquo;</span></a></li>';
-			$postfix = '</ul></nav>'; 
+			$nextlink = '<li class="page-item"><a href="%s" aria-label="Next" class="a-exec-pager page-link" page="%d"><span aria-hidden="true">&raquo;</span></a></li>';
+			$endlink = '<li class="page-item"><a href="%s" aria-label="Next" class="a-exec-pager page-link" page="%d"><span aria-hidden="true">&raquo;&raquo;</span></a></li>';
+			$postfix = '</ul></nav>';
 	 		$clicker = '<script>'
 					 . '$(function() { $(".a-exec-pager").off().on("click", function(e) { e.preventDefault(); %s; }); $(".select-exec-pager").off().on("change", function(e) { %s; }); })'
 					 . '</script>';
 			
 			// HTML生成
-			$html = sprintf($clicker, $scriptAnchor, $scriptSelect);
+			if ($scriptAnchor) {
+				$html = sprintf($clicker, $scriptAnchor, $scriptSelect);
+			} else {
+				$html = '';
+			}
 			$html .= '<div class="row"><div class="col-4 margin-top-md">' . $counter . '</div>';
 			
 			if ($endPage > 1) {
@@ -428,19 +519,19 @@ class Afw_ActionClass extends Ethna_ActionClass
 					$html .= '</select> / ' . $endPage . '</li>';
 				} else {
 					if ($page > 2) {
-						$html .= $firstlink;				
+						$html .= sprintf($firstlink, $url ? sprintf($url, 1): '#');				
 					}
 					if ($page > 1) {
-						$html .= sprintf($prevlink, $page - 1);
+						$html .= sprintf($prevlink, $url ? sprintf($url, $page - 1): '#', $page - 1);
 					}
 					for ($i = 1; $i <= $endPage; $i++) {
-						$html .= sprintf($pager, ($i == $page ? ' active' : ''), $i, $i);
+						$html .= sprintf($pager, ($i == $page ? ' active' : ''), $url ? sprintf($url, $i): '#', $i, $i);
 					}
 					if ($page < $endPage) {
-						$html .= sprintf($nextlink, $page + 1);
+						$html .= sprintf($nextlink, $url ? sprintf($url, $page + 1): '#', $page + 1);
 					}
 					if ($page < $endPage - 1) {
-						$html .= sprintf($endlink, $endPage);
+						$html .= sprintf($endlink, $url ? sprintf($url, $endPage): '#', $endPage);
 					}
 				}
 				$html .= $postfix . '</div>';
@@ -478,144 +569,6 @@ class Afw_ActionClass extends Ethna_ActionClass
 		return $link;
 	}
 	
-	/**
-	 * smarty function: table()
-	 * 
-	 * @param	array	$tables
-	 */
-	function AfwSmartyBlockTable($params, $content = '', &$smarty = array(), &$repeat = true)
-	{
-		if (!$repeat) {
-			// Formats
-			if (strlen(trim($content)) && !($contents = json_decode(json_encode(simplexml_load_string('<document>' . $content . '</document>')), 1))) {
-				return 'format error.';
-			}
-			
-			// 配列の再構築
-			$formats = array();
-			if (is_array($contents)) {
-				foreach ($contents as $type => $c) {
-					$number = 0;
-					$tagNumbers = array();
-					foreach ($c as $tag => $cc) {
-						if (isset($cc['@attributes'])) {
-							$formats[$type][$tag][$cc['@attributes']['col']] = $cc['@attributes']['value'];
-							$tagNumbers[$tag]++;
-						} else {
-							foreach ($cc as $ccc) {
-								$formats[$type][$tag][$ccc['@attributes']['col']] = $ccc['@attributes']['value'];
-								$tagNumbers[$tag]++;
-							}
-						}
-					}
-				}
-			}
-
-			// パラメータ
-			$tables = isset($params['tables']) ? $params['tables'] : array();	// テーブル本体
-			$id = isset($params['id']) ? $params['id'] : '';	// テーブルのID
-			$class = isset($params['class']) ? $params['class'] : '';	// テーブルのCLASS
-			$isNoHeader = isset($params['noheader']) ? $params['noheader'] : false;
-			
-			// ヘッダ生成
-			if (!$isNoHeader) {
-				$html = '<div class="table-responsive">';
-				$html .= sprintf('<table id="%s" class="table %s">', $id, $class);
-			}
-			
-			// テーブル
-			if (is_array($tables)) {
-				if (!$isNoHeader) {
-					// テーブルヘッダ
-					if (isset($tables['header']) && is_array($tables['header'])) {
-						$html .= '<thead class="thead-light">';
-						if (!is_array($tables['header'][0])) {
-							$tables['header'] = array($tables['header']);
-						}
-						foreach ($tables['header'] as $row => $h) {
-							$html .= '<tr>';
-							foreach ($h as $col => $cell) {
-								$cell = htmlspecialchars_decode($cell);
-								
-								// フォーマット
-								$type = isset($formats['header']['type']) ? $this->_checkTableFormat($formats['header']['type'], $col) : false;
-								$class = isset($formats['header']['class']) ? $this->_checkTableFormat($formats['header']['class'], $col) : '';
-								$style = isset($formats['header']['style']) ? $this->_checkTableFormat($formats['header']['style'], $col) : '';
-								$order = isset($formats['header']['order']) ? $this->_checkTableFormat($formats['header']['order'], $col) : false;
-								
-								if ($order) {
-									$desc = '_desc';
-									if ($this->af->get('o') == $order) {
-										$icon = '▲'; //'<i class="glyphicon glyphicon-sort-by-attributes"></i>';
-										$order .= $desc;
-									} elseif ($this->af->get('o') == $order . $desc) {
-										$icon = '▼'; //'<i class="glyphicon glyphicon-sort-by-attributes-alt"></i>';
-									} elseif (!$this->af->get('o') && isset($formats['header']['order']['default']) && $formats['header']['order']['default'] == $order) {
-										// デフォルト
-										$icon = '▲'; //'<i class="glyphicon glyphicon-sort-by-attributes"></i>';
-										$order .= $desc;
-									} else {
-										$icon = ''; //'<i class="glyphicon glyphicon-sort"></i>';
-									}
-									
-									$cell = sprintf('<a href="#" class="%s" order="%s">%s%s</a>',
-										$formats['header']['order']['class'],
-										$order,
-										$cell,
-										$icon
-									);
-								}
-								$html .= sprintf('<th class="%s" style="%s" scope="row">%s</th>', $class, $style, $cell);
-							}
-							$html .= '</tr>';
-						}
-						$html .= '</thead>';
-					}
-				}
-				
-				// テーブル本体
-				$html .= '<tbody>';
-				if (isset($tables['body']) && is_array($tables['body']) && $tables['body']) {
-					foreach ($tables['body'] as $row => $b) {
-						$html .= sprintf('<tr>');
-						
-						foreach ($b as $col => $cell) {
-							$cell = htmlspecialchars_decode($cell);
-							
-							// フォーマット
-							$type = isset($formats['body']['type']) ? $this->_checkTableFormat($formats['body']['type'], $col) : false;
-							$class = isset($formats['body']['class']) ? $this->_checkTableFormat($formats['body']['class'], $col) : (is_numeric($cell) ? 'text-right' : '');
-							$style = isset($formats['body']['style']) ? $this->_checkTableFormat($formats['body']['style'], $col) : '';
-							
-							$html .= sprintf('<%s class="%s" style="%s" scope="row">%s</%s>', ($type ? $type : 'td'), $class, $style, $cell, ($type ? $type : 'td'));
-						}
-						$html .= '</tr>';
-					}
-				} else {
-					$html .= sprintf('<td colspan="%d">%s</td>', count(array_shift($tables['header'])), $this->initval($params['nodata'], ''));
-				}
-				$html .= '</tbody>';
-			}
-			
-			if (!$isNoHeader) {
-				$html .= '</table></div>';
-			}
-			
-			return $html;
-		}
-	}
-	
-	private function _checkTableFormat($formats, $col)
-	{
-		if (isset($formats[$col])) {
-			return $formats[$col];
-		} elseif (isset($formats['all'])) {
-			return $formats['all'];
-		} else {
-			return '';
-		}
-	}
-	
 	public function AfwSmartyModifierYYMM($date)
 	{
 		list($year, $month) = $this->utils->getYM($date);
@@ -627,6 +580,34 @@ class Afw_ActionClass extends Ethna_ActionClass
 		return $str;
 	}
 	
+	// 管理者チェック
+	public function isManager()
+	{
+		if (in_array($this->session->get('user_auth'), (array)$this->config->get('user_auth_admins'))) {
+			return true;
+		}
+		return false;
+	}
+	
+	// 管理者ではない場合はリダイレクト
+	public function requiredManager($url = null)
+	{
+		if (in_array($this->session->get('user_auth'), (array)$this->config->get('user_auth_admins'))) {
+			return true;
+		}
+		$this->redirect($url);
+	}
+	
+	// ログイン状態のチェック
+	public function requiredLogin($url = null)
+	{
+		if ($this->session->get('user_id')) {
+			return true;
+		}
+		
+		$this->redirect($url);
+	}
+	
 	public function isSmartPhone()
 	{
 		// see http://matsui89.com/etc/260/
@@ -634,12 +615,67 @@ class Afw_ActionClass extends Ethna_ActionClass
 		if (
 		 	(strpos($ua, 'iPhone') === false)
 			&& (strpos($ua, 'iPad') === false)
-			&& (strpos($ua, 'Andoid') === false)
+			&& (strpos($ua, 'Android') === false)
 		) {
 			return false;
 		}
 		return true;
 	}
+	
+	function AfwSmartyBlockScript($param = false, $content = '', &$smarty = array(), &$repeat = true)
+	{
+		if (!$repeat) {
+			if ($this->config->get('is_js')) {
+				require_once BASE . '/lib/jsmin/jsmin.php';
+				$content = '<script>' . trim(JSMin::minify($content)) . '</script>';			
+				return $content;
+			} else {
+				return '<script>' . $content . '</script>';
+			}
+		}
+		
+		return $repeat ? false : true;
+	}
+	
+	function AfwSmartyFunctionFile($param, &$smarty)
+	{
+		$fileId = (int)$param['id'];
+		$alt = (string)$param['alt'];
+		$class = (string)$param['class'];
+		$isFileOnly = (bool)$param['is_file_only'];
+		if (!$fileId && !$alt) {
+			return '';
+		}
+		
+		$file = $this->plants->get('files', $fileId);
+		if (!$file && $alt) {
+			$file['server_filename'] = $alt;
+			$file['file_ext'] = pathinfo($alt, PATHINFO_EXTENSION); 
+		}
+		
+		if ($isFileOnly) {
+			return $this->config->get('url') . $this->config->get('upload_url') . $file['server_filename'];
+		}
+
+		if (in_array($file['file_ext'], array('jpg', 'png', 'jpeg', 'gif'))) {
+			return sprintf('<img src="%s%s%s" class="%s" />',
+				$this->config->get('base'), $this->config->get('upload_url'), $file['server_filename'], $class
+			);
+		} elseif (in_array($file['file_ext'], array('mov', 'mp4', 'webm'))) {
+			return sprintf('<video src="%s%s%s" class="%s" controls></video>',
+				$this->config->get('base'), $this->config->get('upload_url'), $file['server_filename'], $class
+			);
+		}
+	}
+	
+	function getView($name)
+	{
+		$views = $this->config->get('views');
+		if ($views[$name]) {
+			return $views[$name];
+		} else {
+			$this->redirect();
+		}
+	}
 }
 // }}}
-?>
